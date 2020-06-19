@@ -1,0 +1,23 @@
+{
+  "name": "itk-signup",
+  "version": "1.0.0",
+  "description": "Hello",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treylorswift/itk-signup.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/treylorswift/itk-signup/issues"
+  },
+  "homepage": "https://github.com/treylorswift/itk-signup#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
