@@ -227,13 +227,14 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedi
 //something went wrong
 app.get('/authError', (req,res) =>
 {
-    res.send('<html><body><br/><br/>Error logging you in with Twitter, sorry</body></html>');
+    res.send('<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><br/><br/>Error logging you in with Twitter, sorry</body></html>');
 });
 
 app.get('/', (req,res)=>
 {
     res.send(`
         <html>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
         ${SiteBody(
         `<center>
         <br/><br/>
@@ -335,7 +336,7 @@ app.get('/admin', async (req,res)=>
     if (!userRow)
     {
         //fatal error if the db isn't working
-        res.send('<html><body><br/><br/>Error accessing your account info, sorry.</body></html>');
+        res.send('<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><br/><br/>Error accessing your account info, sorry.</body></html>');
         return;
     }
 
@@ -357,6 +358,7 @@ app.get('/admin', async (req,res)=>
     res.send(`
         <html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
         function ValidateEmailAddress(email) 
         {
@@ -533,6 +535,7 @@ app.get('/*', async (req:express.Request,res)=>
     {
         res.send(
            `<html>
+            <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
             <body>
             This user has not created a signup, sorry.
             </body>
@@ -542,6 +545,7 @@ app.get('/*', async (req:express.Request,res)=>
     res.send(
        `<html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
         function ValidateEmailAddress(email) 
         {

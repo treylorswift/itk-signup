@@ -147,11 +147,12 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedi
 //after oauth login we do a final check here just so we can show them an error on this landing page if
 //something went wrong
 app.get('/authError', (req, res) => {
-    res.send('<html><body><br/><br/>Error logging you in with Twitter, sorry</body></html>');
+    res.send('<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><br/><br/>Error logging you in with Twitter, sorry</body></html>');
 });
 app.get('/', (req, res) => {
     res.send(`
         <html>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
         ${SiteBody(`<center>
         <br/><br/>
         Want people to sign up for your newsletter?<br/><br/><br/>We can help. Let's get started!<br/><br/><br/>
@@ -224,7 +225,7 @@ app.get('/admin', async (req, res) => {
     let userRow = await g_pgdb.GetUserById(id_str);
     if (!userRow) {
         //fatal error if the db isn't working
-        res.send('<html><body><br/><br/>Error accessing your account info, sorry.</body></html>');
+        res.send('<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><br/><br/>Error accessing your account info, sorry.</body></html>');
         return;
     }
     //some server-side logic here.. if they already have set an email address on their account,
@@ -241,6 +242,7 @@ app.get('/admin', async (req, res) => {
     res.send(`
         <html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
         function ValidateEmailAddress(email) 
         {
@@ -393,6 +395,7 @@ app.get('/*', async (req, res) => {
     //this page doesn't exist..
     if (!user || !user.email || !user.screen_name || !user.id_str) {
         res.send(`<html>
+            <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
             <body>
             This user has not created a signup, sorry.
             </body>
@@ -401,6 +404,7 @@ app.get('/*', async (req, res) => {
     }
     res.send(`<html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
         function ValidateEmailAddress(email) 
         {
