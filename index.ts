@@ -305,7 +305,9 @@ function SiteBody(body):string
 {
     let str = 
        `<body style='font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:15px;'>
-            <div style="display:flex; justify-content:center"><img style="width:320px" src="logo.png"></div>
+            <div style="display:flex; justify-content:center">
+                <div style="display:inline; width:320px;"><img style="width:100%;height:auto" src="logo.png"></div>
+            </div>
             <div style="display:flex; justify-content:center">
                 <div>${body}</div>
             </div>
@@ -440,7 +442,7 @@ app.get('/admin', async (req,res)=>
             Welcome, ${userRow.screen_name}!<br/><br/><br />
             Let's create a form that people can use to opt-in to your newsletter.<br/><br/><br />
             Please share your email address with us so we can notify you when people sign up:<br /><br />
-            <input id="email" style="width:200px" type="text" placeholder="Enter your email address" ${valueEqualsEmail}><button onclick="setEmail()"}>Save</button><br/><br /><br/>
+            <input id="email" style="width:220px" type="text" placeholder="Enter your email address" ${valueEqualsEmail}><button onclick="setEmail()"}>Save</button><br/><br /><br/>
             <div id="emailResult">
             </div>
             If you no longer want to maintain a sign up page or be contacted by others, <button onclick="cancel()">Click Here</button> to remove your account.<br/><br/>
@@ -598,7 +600,7 @@ app.get('/*', async (req:express.Request,res)=>
                     <br/><br/>
                     <center>
                     Would you like to receive ${user.screen_name}'s newsletter?<br/><br/>
-                    <input id="email" style="width:200px;" type="text" placeholder="Enter your email address"><button id="signup" onclick="signUp()">Sign Up</button><br/><br/>
+                    <input id="email" style="width:220px;" type="text" placeholder="Enter your email address"><button id="signup" onclick="signUp()">Sign Up</button><br/><br/>
                     <div id="emailResult"></div>
                     </center>
                     <br/>
