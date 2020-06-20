@@ -54,10 +54,24 @@ class PGDB
         try
         {
             //const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/todo';
-            let dbConfig = {
-                    user:'postgres',
-                    password:'testing123',
+            let dbConfig:any = {
+                connectionstring: process.env.DATABASE_URL,
+                ssl: {
+                    rejectUnauthorized: false
+                }
             };
+
+            if (g_localDevServer)
+            {
+                dbConfig.user = 'postgres';
+                dbConfig.password = 'testing123';
+            }
+            else
+            {
+                dbConfig.ssl = {
+                    rejectUnauthorized: false
+                }
+            }
 
             this.pool = new pg.Pool(dbConfig);
 
