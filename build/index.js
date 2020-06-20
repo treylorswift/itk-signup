@@ -40,7 +40,7 @@ class PGDB {
             console.log("DATABASE_URL:");
             console.log(dbUrl);
             let dbConfig = {
-                connectionstring: dbUrl
+                connectionString: dbUrl
             };
             if (g_localDevServer) {
                 dbConfig.user = 'postgres';

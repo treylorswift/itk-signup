@@ -59,7 +59,7 @@ class PGDB
             console.log(dbUrl);
 
             let dbConfig:any = {
-                connectionstring: dbUrl
+                connectionString: dbUrl
             };
 
             if (g_localDevServer)
