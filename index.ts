@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 
 const g_localDevServer = (process.platform === "win32");
 
-var CALLBACK_URL = 'http://itk-signup.herokuapp.com/auth/twitter/callback';
+var CALLBACK_URL = 'https://itk-signup.herokuapp.com/auth/twitter/callback';
 
 if (g_localDevServer)
     CALLBACK_URL = 'http://localhost:3000/auth/twitter/callback';
