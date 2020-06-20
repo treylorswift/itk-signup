@@ -53,12 +53,11 @@ class PGDB
     {    
         try
         {
+            console.log("DATABASE_URL:");
+            console.log(process.env.DATABSAE_URL);
             //const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/todo';
             let dbConfig:any = {
-                connectionstring: process.env.DATABASE_URL,
-                ssl: {
-                    rejectUnauthorized: false
-                }
+                connectionstring: process.env.DATABASE_URL
             };
 
             if (g_localDevServer)

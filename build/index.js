@@ -36,12 +36,11 @@ let g_pgdb = null;
 class PGDB {
     async Init() {
         try {
+            console.log("DATABASE_URL:");
+            console.log(process.env.DATABSAE_URL);
             //const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/todo';
             let dbConfig = {
-                connectionstring: process.env.DATABASE_URL,
-                ssl: {
-                    rejectUnauthorized: false
-                }
+                connectionstring: process.env.DATABASE_URL
             };
             if (g_localDevServer) {
                 dbConfig.user = 'postgres';
