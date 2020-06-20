@@ -152,13 +152,11 @@ app.get('/authError', (req, res) => {
 app.get('/', (req, res) => {
     res.send(`
         <html>
-        <body>
-            <center>
-            <br/><br/>
-            Want people to sign up for your newsletter?<br/><br/>We can help. Let's get started.<br/><br/>
-            <button onclick="window.location='/auth/twitter'">Login with Twitter</button>
-            </center>
-        </body>
+        ${SiteBody(`<center>
+        <br/><br/>
+        Want people to sign up for your newsletter?<br/><br/><br/>We can help. Let's get started!<br/><br/><br/>
+        <button onclick="window.location='/auth/twitter'">Login with Twitter</button>
+        </center>`)}
         </html>`);
 });
 function GetProfileFromRequest(req) {
@@ -202,6 +200,15 @@ app.post('/api/cancel', (req, res) => {
     else
         res.send(JSON.stringify({ success: false }));
 });
+function SiteBody(body) {
+    let str = `<body style='font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:15px;'>
+            <div style="display:flex; justify-content:center"><img style="width:320px" src="logo.png"></div>
+            <div style="display:flex; justify-content:center">
+                <div>${body}</div>
+            </div>
+        </body>`;
+    return str;
+}
 app.get('/admin', async (req, res) => {
     let profile = GetProfileFromRequest(req);
     if (!profile) {
@@ -266,9 +273,9 @@ app.get('/admin', async (req, res) => {
                 var json = await resp.json();
 
                 if (json.success===true)
-                    setResult('Thanks! Direct potential subscribers to this sign up page:<br /><br /><a href="${linkPath}">${fullLink}</a><br/><br/>When someone signs up, you will receive an email at the address you provided above. Good luck!');
+                    setResult('Thanks! Direct potential subscribers to this sign up page:<br /><br /><a href="${linkPath}">${fullLink}</a><br/><br/>When someone signs up, you will receive an email at the address you provided above. Good luck!<br /><br/><br/>');
                 else
-                    setResult('Sorry, something went wrong. Please try again later.');
+                    setResult('Sorry, something went wrong. Please try again later.<br/><br/><br/>');
             }
             catch (err)
             {
@@ -311,19 +318,18 @@ app.get('/admin', async (req, res) => {
         }
         </script>
         </head>
-        <body>
-            <br/><br/>
-            Welcome ${userRow.screen_name}!<br/><br/>Thanks for trying Influencer Toolkit.<br/><br/>
-            We're creating a form that people can use to opt-in to your newsletter.<br/><br/>
-            It's is almost ready to go, we just need your email address so we can notify you when people sign up:<br /><br />
-            <input id="email" type="text" placeholder="Enter your email address" ${valueEqualsEmail}><button onclick="setEmail()"}>Save</button><br/><br/>
+        ${SiteBody(`
+            <br/>
+            Welcome, ${userRow.screen_name}!<br/><br/><br />
+            Let's create a form that people can use to opt-in to your newsletter.<br/><br/><br />
+            Please share your email address with us so we can notify you when people sign up:<br /><br />
+            <input id="email" style="width:200px" type="text" placeholder="Enter your email address" ${valueEqualsEmail}><button onclick="setEmail()"}>Save</button><br/><br /><br/>
             <div id="emailResult">
             </div>
-            <br/><br/><br/><br/>
             If you no longer want to maintain a sign up page or be contacted by others, <button onclick="cancel()">Click Here</button> to remove your account.<br/><br/>
             <div id="cancelResult">
-            </div>            
-        </body></head></html>`);
+            </div>`)}
+        </head></html>`);
 });
 app.post('/api/signUp', async (req, res) => {
     //json must contain:
@@ -377,6 +383,7 @@ Influencer Toolkit`
         res.send(JSON.stringify({ success: false }));
     }
 });
+app.use(express.static('./www'));
 app.get('/*', async (req, res) => {
     let screen_name_query = req.path.substr(1);
     let user = await g_pgdb.GetUserByScreenName(screen_name_query);
@@ -406,6 +413,9 @@ app.get('/*', async (req, res) => {
             let email = document.getElementById('email').value;
             if (!ValidateEmailAddress(email))
                 return;
+
+            let button = document.getElementById("signup");
+            button.disabled = 'true';
 
             var fetchParams = {
                 method: 'POST',
@@ -441,17 +451,23 @@ app.get('/*', async (req, res) => {
         }
         </script>
         </head>
-        <body>
-        <br/><br/>
-        Interested in ${user.screen_name}'s newsletter? Sign up here:<br/><br/>
-        <input id="email" type="text" placeholder="Enter your email address"><button onclick="signUp()">Sign Up</button><br/><br/>
-        <div id="emailResult"></div>
+        <body style='font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:15px;'>
+            <div style="display:flex; justify-content:center">
+                <div>
+                    <br/><br/>
+                    <center>
+                    Would you like to receive ${user.screen_name}'s newsletter?<br/><br/>
+                    <input id="email" style="width:200px;" type="text" placeholder="Enter your email address"><button id="signup" onclick="signUp()">Sign Up</button><br/><br/>
+                    <div id="emailResult"></div>
+                    </center>
+                    <br/>
+                    <div style="text-align:right"><a href="/"><img style="width:140px" src="logo.png"></a></div>
+                </div>
+            </div>
         </body>
         </html>`);
     // req.path
 });
-//setup static paths 
-//app.use(express.static('./www'));
 async function ValidateAppAuth() {
     let app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json');
     if (!app_auth) {
