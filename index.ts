@@ -239,7 +239,7 @@ app.get('/', (req,res)=>
         `<center>
         <br/><br/>
         Want people to sign up for your newsletter?<br/><br/><br/>We can help. Let's get started!<br/><br/><br/>
-        <button onclick="window.location='/auth/twitter'">Login with Twitter</button>
+        <button onclick="window.location='/auth/twitter'">Sign in with Twitter</button>
         </center>`)}
         </html>`);
 });
