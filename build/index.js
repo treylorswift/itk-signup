@@ -9,12 +9,19 @@ const express = require("express");
 //SESSION_SECRET - random string used to encrypt session cookies
 //CONSUMER_KEY - the Twitter App API key
 //CONSUMER_SECRET - the Twitter App API
+//GMAIL_USER - the gmail account notification emails are sent from
+//GMAIL_PW - password for the gmail account the notification emails are sent from
+const g_localDevServer = false;
+//if set to true, all the above Heroku / environment vars are not used.
+//instead, most of those values are hardcoded below.
+//search for g_localDevServer to find where to fill in the blanks
+//the only thing not hard coded is the Twitter Api app keys, which you must
+//place into 'app_auth.json'
 var session = require('express-session');
 var passport = require('passport');
 var TwitterStrategy = require('passport-twitter').Strategy;
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const g_localDevServer = (process.platform === "win32");
 var CALLBACK_URL = 'https://itk-signup.herokuapp.com/auth/twitter/callback';
 if (g_localDevServer)
     CALLBACK_URL = 'http://localhost:3000/auth/twitter/callback';
@@ -358,15 +365,26 @@ app.post('/api/signUp', async (req, res) => {
     }
     //so now, we can send them that email
     try {
+        let gmail_user;
+        let gmail_pw;
+        if (g_localDevServer) {
+            //put in some account credentials here
+            gmail_user = '';
+            gmail_pw = '';
+        }
+        else {
+            gmail_user = process.env.GMAIL_USER;
+            gmail_pw = process.env.GMAIL_PW;
+        }
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'itksignup',
-                pass: 'imsuchaninfluencermichaeljackson22'
+                user: gmail_user,
+                pass: gmail_pw
             }
         });
         var mailOptions = {
-            from: 'itksignup@gmail.com',
+            from: `${gmail_user}@gmail.com`,
             to: userRow.email,
             subject: `${json.email} is interested in your newsletter!`,
             text: `${json.email} has opted in to hear more about your newsletter. Get in touch with them and share your brilliant ideas!
