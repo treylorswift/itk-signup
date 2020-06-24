@@ -4,6 +4,9 @@ Influencer Toolkit Newsletters is a web app that provides users with a fast and 
 
 The user visits the website, logs with their Twitter account, and submits their email address. They receive a link to their newsletter sign up page which they can share with anyone, and they will be notified by email any time someone signs up for their newsletter.
 
+![admin](https://i.imgur.com/JKYe1aB.png)
+![signup](https://i.imgur.com/MTsT8It.png)
+
 This web app compliments the [Influencer Toolkit Desktop App](https://github.com/treylorswift/InfluencerToolkitApp), an app designed to automate sending direct messages to Twitter followers.
 
 Out of the box this repo can be deployed to Heroku so long as the following Heroku config variables are defined:
