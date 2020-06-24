@@ -646,6 +646,9 @@ async function ValidateAppAuth():Promise<boolean>
 
     try
     {
+        console.log("using consumer key: " + app_auth.consumer_key);
+        console.log("using consumer secret: " + app_auth.consumer_secret);
+
         //@ts-ignore
         let testClient = new Twitter({
             consumer_key: app_auth.consumer_key,

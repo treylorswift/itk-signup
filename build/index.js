@@ -494,6 +494,8 @@ async function ValidateAppAuth() {
         app_auth.consumer_secret = process.env.CONSUMER_SECRET;
     }
     try {
+        console.log("using consumer key: " + app_auth.consumer_key);
+        console.log("using consumer secret: " + app_auth.consumer_secret);
         //@ts-ignore
         let testClient = new Twitter({
             consumer_key: app_auth.consumer_key,
