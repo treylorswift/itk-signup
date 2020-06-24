@@ -7,8 +7,10 @@ The user visits the website, logs with their Twitter account, and submits their 
 ![admin](https://i.imgur.com/JKYe1aB.png)
 ![signup](https://i.imgur.com/MTsT8It.png)
 
-This web app compliments the [Influencer Toolkit Desktop App](https://github.com/treylorswift/InfluencerToolkitApp), an app designed to automate sending direct messages to Twitter followers.
+### Live Demo
+There is a live version deployed to Heroku currently at https://itk-signup.herokuapp.com
 
+### Deploying to Heroku
 Out of the box this repo can be deployed to Heroku so long as the following Heroku config variables are defined:
 - DATABASE_URL - a url for a Postgresql database
 - SESSION_SECRET - a random string used to encrypt session cookies
