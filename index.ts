@@ -3,8 +3,17 @@ import * as TwitterAuth from './TwitterAuth'
 import * as Twitter from 'twitter-lite'
 import * as express from 'express';
 
-const nodemailer = require('nodemailer');    
-const bodyParser = require('body-parser');
+//when hosting on Heroku, make sure to define the following environment vars ("Config Variables")
+//DATABASE_URL - the location of the postgresql database
+//SESSION_SECRET - random string used to encrypt session cookies
+//CONSUMER_KEY - the Twitter App API key
+//CONSUMER_SECRET - the Twitter App API
+
+var session         = require('express-session');
+var passport        = require('passport');
+var TwitterStrategy = require('passport-twitter').Strategy;
+const nodemailer    = require('nodemailer');    
+const bodyParser    = require('body-parser');
 
 const g_localDevServer = (process.platform === "win32");
 
@@ -13,19 +22,16 @@ var CALLBACK_URL = 'https://itk-signup.herokuapp.com/auth/twitter/callback';
 if (g_localDevServer)
     CALLBACK_URL = 'http://localhost:3000/auth/twitter/callback';
 
-var session         = require('express-session');
-//var useragent       = require('express-useragent');
-var passport        = require('passport');
-var TwitterStrategy = require('passport-twitter').Strategy;
 
 //this is used to encrypt session cookies - in production, should be in an environment variable defined on the server
-const SESSION_SECRET   = 'vnyfw87ynfch3/AFV(FW(IFCN@A@O#J$F)FANJC@IEQEN';
+let SESSION_SECRET = process.env.SESSION_SECRET;
+if (g_localDevServer)
+    SESSION_SECRET = 'vnyfw87ynfch3/AFV(FW(IFCN@A@O#J$F)FANJC@IEQEN'
 
 // Initialize Express and middlewares
 var sessionParser = session({secret: SESSION_SECRET, resave: false, saveUninitialized: false});
 var app = express();
 app.use(sessionParser);
-//app.use(useragent.express());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true , limit: '5mb'}));
@@ -620,19 +626,30 @@ app.get('/*', async (req:express.Request,res)=>
 
 async function ValidateAppAuth():Promise<boolean>
 {
-    let app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json')
-    if (!app_auth)
+    let app_auth:TwitterAuth.AppAuth;
+
+    if (g_localDevServer)
     {
-        console.log("Failed to obtain keys from app_auth.json");
-        return false;
+        let app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json')
+        if (!app_auth)
+        {
+            console.log("Failed to obtain keys from app_auth.json");
+            return false;
+        }
+    }
+    else
+    {
+        //production deploy pulls auth from environment variables
+        app_auth.consumer_key = process.env.CONSUMER_KEY;
+        app_auth.consumer_secret = process.env.CONSUMER_SECRET;
     }
 
     try
     {
         //@ts-ignore
         let testClient = new Twitter({
-            consumer_key: app_auth.consumer_key, // from Twitter.
-            consumer_secret: app_auth.consumer_secret, // from Twitter.
+            consumer_key: app_auth.consumer_key,
+            consumer_secret: app_auth.consumer_secret
         });
 
         const bearerOK = await testClient.getBearerToken();
