@@ -4,6 +4,10 @@ Influencer Toolkit Newsletters is a web app that provides users with a fast and 
 
 The user visits the website, logs with their Twitter account, and submits their email address. They receive a link to their newsletter sign up page which they can share with anyone, and they will be notified by email any time someone signs up for their newsletter.
 
+Sign up links can include a referral code which will be passed along in the notification email any time someone signs up.
+
+For example, this sign up link "https://itk-signup.herokuapp.com/treylorswift?refTw=balajis" would credit the Twitter user 'balajis' any time someone signs up for 'treylorswift's newsletter.
+
 ![admin](https://i.imgur.com/JKYe1aB.png)
 ![signup](https://i.imgur.com/MTsT8It.png)
 
