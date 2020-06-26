@@ -6,7 +6,7 @@ The user visits the website, logs with their Twitter account, and submits their 
 
 Sign up links can include a referral code which will be passed along in the notification email any time someone signs up.
 
-For example, this sign up link "https://itk-signup.herokuapp.com/treylorswift?refTw=balajis" would credit the Twitter user 'balajis' any time someone signs up for 'treylorswift's newsletter.
+For example, this sign up link "https://itk-signup.herokuapp.com/treylorswift?twRef=balajis" would credit the Twitter user 'balajis' any time someone signs up for 'treylorswift's newsletter.
 
 ![admin](https://i.imgur.com/JKYe1aB.png)
 ![signup](https://i.imgur.com/MTsT8It.png)
