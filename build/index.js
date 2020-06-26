@@ -4,6 +4,7 @@ const pg = require("pg");
 const TwitterAuth = require("./TwitterAuth");
 const Twitter = require("twitter-lite");
 const express = require("express");
+const fs = require("fs");
 //when hosting on Heroku, make sure to define the following environment vars ("Config Variables")
 //DATABASE_URL - the location of the postgresql database
 //SESSION_SECRET - random string used to encrypt session cookies
@@ -11,7 +12,7 @@ const express = require("express");
 //CONSUMER_SECRET - the Twitter App API
 //GMAIL_USER - the gmail account notification emails are sent from
 //GMAIL_PW - password for the gmail account the notification emails are sent from
-const g_localDevServer = false;
+const g_localDevServer = true;
 //if set to true, all the above Heroku / environment vars are not used.
 //instead, most of those values are hardcoded below.
 //search for g_localDevServer to find where to fill in the blanks
@@ -44,6 +45,7 @@ passport.deserializeUser(function (obj, cb) {
     cb(null, obj);
 });
 let g_appAuth = null;
+let g_gmailAuth = null;
 let g_pgdb = null;
 class PGDB {
     async Init() {
@@ -356,6 +358,12 @@ app.post('/api/signUp', async (req, res) => {
         res.sendStatus(404);
         return;
     }
+    //pull out whatever twitter handle was included in the original sign up link
+    let referringTwitterHandle = null;
+    try {
+        referringTwitterHandle = json.query.twRef;
+    }
+    catch (err) { }
     let userRow = await g_pgdb.GetUserById(json.id);
     //we gotta know whose newsletter it is they're looking for..
     //and that person must have given us an email address..
@@ -365,29 +373,21 @@ app.post('/api/signUp', async (req, res) => {
     }
     //so now, we can send them that email
     try {
-        let gmail_user;
-        let gmail_pw;
-        if (g_localDevServer) {
-            //put in some account credentials here
-            gmail_user = '';
-            gmail_pw = '';
-        }
-        else {
-            gmail_user = process.env.GMAIL_USER;
-            gmail_pw = process.env.GMAIL_PW;
-        }
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: gmail_user,
-                pass: gmail_pw
+                user: g_gmailAuth.user,
+                pass: g_gmailAuth.pass
             }
         });
+        let referralMessage = '';
+        if (referringTwitterHandle)
+            referralMessage = `They were referred by Twitter user "${referringTwitterHandle}". `;
         var mailOptions = {
-            from: `${gmail_user}@gmail.com`,
+            from: `${g_gmailAuth.user}@gmail.com`,
             to: userRow.email,
             subject: `${json.email} is interested in your newsletter!`,
-            text: `${json.email} has opted in to hear more about your newsletter. Get in touch with them and share your brilliant ideas!
+            text: `${json.email} has opted in to hear more about your newsletter. ${referralMessage}Get in touch with them and share your brilliant ideas!
 
 Cheers,
 
@@ -451,7 +451,8 @@ app.get('/*', async (req, res) => {
                 headers: {'Content-Type': 'application/json'},
                 body:JSON.stringify({
                     email:email,
-                    id:${user.id_str}
+                    id:${user.id_str},
+                    query:${JSON.stringify(req.query)}
                 })
             };
 
@@ -466,7 +467,7 @@ app.get('/*', async (req, res) => {
                 var json = await resp.json();
 
                 if (json.success===true)
-                    setResult('Thanks, you should be hearing from ${user.screen_name} soon!<br /><br />');
+                    setResult(\`Thanks, you should be hearing from ${user.screen_name} soon!\`);
                 else
                     setResult('Sorry, something went wrong. Please try again later.');
             }
@@ -497,10 +498,37 @@ app.get('/*', async (req, res) => {
         </html>`);
     // req.path
 });
+function ValidateGmailAuth() {
+    let gmail_auth = null;
+    if (g_localDevServer) {
+        try {
+            gmail_auth = JSON.parse(fs.readFileSync('./gmail_auth.json', 'utf-8'));
+        }
+        catch (err) {
+            console.log("Error reading ./gmail_auth.json - please put gmail 'user' and 'pass' into ./gmail_auth.json");
+            console.error(err);
+            return false;
+        }
+    }
+    else {
+        //production deploy pulls auth from environment variables
+        gmail_auth = {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PW
+        };
+    }
+    if (!gmail_auth.user || typeof (gmail_auth.user) !== 'string' ||
+        !gmail_auth.pass || typeof (gmail_auth.pass) !== 'string') {
+        console.log(`Gmail auth must have non-empty strings for 'user' and 'pass': ${JSON.stringify(gmail_auth)}`);
+        return false;
+    }
+    g_gmailAuth = gmail_auth;
+    return true;
+}
 async function ValidateAppAuth() {
     let app_auth;
     if (g_localDevServer) {
-        let app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json');
+        app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json');
         if (!app_auth) {
             console.log("Failed to obtain keys from app_auth.json");
             return false;
@@ -539,6 +567,10 @@ async function main() {
     if (!authOK) {
         process.exit(-1);
     }
+    console.log("Getting Gmail auth..");
+    let gmailOK = ValidateGmailAuth();
+    if (!gmailOK)
+        process.exit(-1);
     //make sure db connection works
     console.log("Testing db connection..");
     g_pgdb = new PGDB();

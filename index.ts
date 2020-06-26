@@ -2,6 +2,7 @@ import * as pg from 'pg'
 import * as TwitterAuth from './TwitterAuth'
 import * as Twitter from 'twitter-lite'
 import * as express from 'express';
+import * as fs from 'fs';
 
 //when hosting on Heroku, make sure to define the following environment vars ("Config Variables")
 //DATABASE_URL - the location of the postgresql database
@@ -56,6 +57,10 @@ passport.deserializeUser(function(obj, cb) {
 });
 
 let g_appAuth:TwitterAuth.AppAuth = null;
+
+type GmailAuth = {user:string, pass:string};
+let g_gmailAuth:GmailAuth = null;
+
 let g_pgdb:PGDB = null;
 
 
@@ -482,6 +487,15 @@ app.post('/api/signUp', async (req,res)=>
         return;
     }
     
+    //pull out whatever twitter handle was included in the original sign up link
+    let referringTwitterHandle = null;
+    try
+    {
+        referringTwitterHandle = json.query.twRef;
+    }
+    catch (err) {}
+
+
     let userRow = await g_pgdb.GetUserById(json.id);
 
     //we gotta know whose newsletter it is they're looking for..
@@ -495,35 +509,24 @@ app.post('/api/signUp', async (req,res)=>
     //so now, we can send them that email
     try
     {
-        let gmail_user:string;
-        let gmail_pw:string;
-
-        if (g_localDevServer)
-        {
-            //put in some account credentials here
-            gmail_user = '';
-            gmail_pw = ''
-        }
-        else
-        {
-            gmail_user = process.env.GMAIL_USER;
-            gmail_pw = process.env.GMAIL_PW;
-        }
-
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: gmail_user,
-                pass: gmail_pw
+                user: g_gmailAuth.user,
+                pass: g_gmailAuth.pass
             }
         });
  
+        let referralMessage = ''
+        if (referringTwitterHandle)
+            referralMessage = `They were referred by Twitter user "${referringTwitterHandle}". `;
+
         var mailOptions = {
-          from: `${gmail_user}@gmail.com`,
+          from: `${g_gmailAuth.user}@gmail.com`,
           to: userRow.email,
           subject: `${json.email} is interested in your newsletter!`,
           text:
-`${json.email} has opted in to hear more about your newsletter. Get in touch with them and share your brilliant ideas!
+`${json.email} has opted in to hear more about your newsletter. ${referralMessage}Get in touch with them and share your brilliant ideas!
 
 Cheers,
 
@@ -599,7 +602,8 @@ app.get('/*', async (req:express.Request,res)=>
                 headers: {'Content-Type': 'application/json'},
                 body:JSON.stringify({
                     email:email,
-                    id:${user.id_str}
+                    id:${user.id_str},
+                    query:${JSON.stringify(req.query)}
                 })
             };
 
@@ -614,7 +618,7 @@ app.get('/*', async (req:express.Request,res)=>
                 var json = await resp.json();
 
                 if (json.success===true)
-                    setResult('Thanks, you should be hearing from ${user.screen_name} soon!<br /><br />');
+                    setResult(\`Thanks, you should be hearing from ${user.screen_name} soon!\`);
                 else
                     setResult('Sorry, something went wrong. Please try again later.');
             }
@@ -647,6 +651,43 @@ app.get('/*', async (req:express.Request,res)=>
    // req.path
 });
 
+function ValidateGmailAuth():boolean
+{
+    let gmail_auth:GmailAuth = null;
+
+    if (g_localDevServer)
+    {
+        try
+        {
+            gmail_auth = JSON.parse(fs.readFileSync('./gmail_auth.json','utf-8'));
+        }
+        catch (err)
+        {
+            console.log("Error reading ./gmail_auth.json - please put gmail 'user' and 'pass' into ./gmail_auth.json");
+            console.error(err);
+            return false;
+        }
+    }
+    else
+    {
+        //production deploy pulls auth from environment variables
+        gmail_auth = {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PW
+        }
+    }
+
+    if (!gmail_auth.user || typeof(gmail_auth.user)!=='string' ||
+        !gmail_auth.pass || typeof(gmail_auth.pass)!=='string')
+    {
+        console.log(`Gmail auth must have non-empty strings for 'user' and 'pass': ${JSON.stringify(gmail_auth)}`);
+        return false;
+    }
+
+    g_gmailAuth = gmail_auth;
+    return true;
+}
+
 
 async function ValidateAppAuth():Promise<boolean>
 {
@@ -654,7 +695,7 @@ async function ValidateAppAuth():Promise<boolean>
 
     if (g_localDevServer)
     {
-        let app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json')
+        app_auth = TwitterAuth.TryLoadAppAuth('app_auth.json')
         if (!app_auth)
         {
             console.log("Failed to obtain keys from app_auth.json");
@@ -704,6 +745,11 @@ async function main()
     {
         process.exit(-1);
     }
+
+    console.log("Getting Gmail auth..");
+    let gmailOK = ValidateGmailAuth();
+    if (!gmailOK)
+        process.exit(-1);
 
     //make sure db connection works
     console.log("Testing db connection..");
