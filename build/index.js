@@ -12,7 +12,7 @@ const fs = require("fs");
 //CONSUMER_SECRET - the Twitter App API
 //GMAIL_USER - the gmail account notification emails are sent from
 //GMAIL_PW - password for the gmail account the notification emails are sent from
-const g_localDevServer = true;
+const g_localDevServer = false;
 //if set to true, all the above Heroku / environment vars are not used.
 //instead, most of those values are hardcoded below.
 //search for g_localDevServer to find where to fill in the blanks
